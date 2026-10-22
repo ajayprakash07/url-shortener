@@ -13,10 +13,11 @@ function encode(num: number): string{
 }
 
 function decode(num: string): number{
+    console.log(num.length);
     let ans: number=0;
     for(let i:number =0;i<num.length;i++){
-        const index = key.indexOf(num.charAt(i)) || -1;
-        if(index==-1) return -1;
+        const index:number = key.indexOf(num.charAt(i));
+        if(index<0 && index>key.length) return -1;
         ans += index * Math.pow(62,i);
     }
     return ans;

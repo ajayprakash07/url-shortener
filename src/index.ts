@@ -5,10 +5,9 @@ import controlRoute from "./routes/control.routes.js";
 const app = express();
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials: true,
-    allowedHeaders: ["Content-Type", "x-app-pin"]
-
+    origin: process.env.CORS_ORIGIN || "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 app.use(express.json({limit: "128kb"})); 
@@ -19,6 +18,7 @@ app.use(express.static("public"));
 
 
 app.get("/", (req, res) => {
+  console.log("healthy");
   res.status(200).json({
     status: "success",
     message: "API Server is live and healthy",
@@ -26,5 +26,5 @@ app.get("/", (req, res) => {
   });
 });
 
-app.use("/logRouter/v1",controlRoute)
+app.use("/api",controlRoute)
 export { app };
