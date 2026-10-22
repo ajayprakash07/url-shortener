@@ -1,0 +1,10 @@
+-- CreateTable
+CREATE TABLE "Link" (
+    "id" SERIAL NOT NULL,
+    "url" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "visit" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "Link_pkey" PRIMARY KEY ("id")
+);
