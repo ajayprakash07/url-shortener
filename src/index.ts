@@ -1,5 +1,6 @@
 import express from "express";
 import cors from 'cors';
+import controlRoute from "./routes/control.routes.js";
 
 const app = express();
 
@@ -16,6 +17,14 @@ app.use(express.urlencoded({extended: true, limit: "16kb"}));
 
 app.use(express.static("public"));
 
-app.use("/short/")
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    message: "API Server is live and healthy",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.use("/logRouter/v1",controlRoute)
 export { app };
