@@ -34,7 +34,6 @@ const createLink = asyncHandler(async(req,res) => {
         throw new ApiError(408,"Short URL did not process");
     }
 
-    console.log(shortCode);
     return res.status(201).json(
         new ApiResponse(201,shortCode, "Short URL Successfully Created")
     );
@@ -67,11 +66,11 @@ const directURL = asyncHandler(async(req,res) => {
         data: { visit: { increment: 1 }}
     })
 
-    console.log(url.url)
+    // return res.status(200).json(
+    //     new ApiResponse(200,url,"URL successfully Fetched")
+    // );
 
-    return res.status(200).json(
-        new ApiResponse(200,url,"URL successfully Fetched")
-    );
+    return res.redirect(url.url);
 });
 
 export {

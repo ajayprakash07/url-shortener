@@ -13,7 +13,6 @@ function encode(num: number): string{
 }
 
 function decode(num: string): number{
-    console.log(num.length);
     let ans: number=0;
     for(let i:number =0;i<num.length;i++){
         const index:number = key.indexOf(num.charAt(i));

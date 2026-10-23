@@ -12,4 +12,18 @@ model Link {
   createdAt  DateTime   @default(now()) 
   updatedAt  DateTime   @updatedAt
   visit      Int        @default(0)
+  userId     Int
+  user       User       @relation(fields: [userId], references: [id] , onDelete: Cascade)
+}
+
+model User{
+  id         Int @id @default(autoincrement())
+  name       String
+  password   String 
+  email      String @unique
+  phone      Int @unique
+  links      Link[]
+  query      Int @default(0)
+  lastquery  DateTime @default(now())
+  refreshToken String?
 }
