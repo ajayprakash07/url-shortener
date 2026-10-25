@@ -11,14 +11,20 @@ const offset:number = 15000000;
 
 const createLink = asyncHandler(async(req,res) => {
     const {url} = req.body;
-
+    const {id}  = (req as any).user;
+    
     if(!url || typeof url !== "string" || url.trim()===""){
         throw new ApiError(400,"URL cannot be empty");
     }
 
+    if(!id){
+        throw new ApiError(400,"User id is required");
+    }
+
     const upload: Link | null = await prisma.link.create({
         data: {
-            url: url
+            url: url,
+            userId: id
         }
     });
 
@@ -66,14 +72,34 @@ const directURL = asyncHandler(async(req,res) => {
         data: { visit: { increment: 1 }}
     })
 
-    // return res.status(200).json(
-    //     new ApiResponse(200,url,"URL successfully Fetched")
-    // );
+    return res.status(200).json(
+        new ApiResponse(200,url,"URL successfully Fetched")
+    );
+});
 
-    return res.redirect(url.url);
+const deleteURL = asyncHandler(async(req,res) => {
+    const {id}  =req.params;
+
+    if(!id){
+        throw new ApiError(400,"Link id missing");
+    }
+
+    const del = await prisma.link.delete({
+        where: {id:Number(id)}
+    });
+
+    if(!del){
+        throw new ApiError(401,"Unable to delete");
+    }
+
+    console.log("Link deleted");
+    return res.status(201).json(
+        new ApiResponse(200,del,"Successfully Deleted")
+    );
 });
 
 export {
     createLink,
-    directURL
+    directURL,
+    deleteURL
 }

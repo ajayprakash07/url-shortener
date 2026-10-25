@@ -18,24 +18,26 @@ const verifyJWT = asyncHandler(async(req: AuthRequest,_:Response,next:NextFuncti
             throw new ApiError(401,"Unauthorized request")
         }
     
+
         const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as { id: number; email: string };
         
         const user = await prisma.user.findUnique({ where : {id: decodedToken.id} , select: {
         id: true,
         name: true,
         email: true,
-        phone: true,
-        createdAt: true
+        phone: true
     }});
 
         if(!user){
-            throw new ApiError(401, "Invalid Access Token")
+            throw new ApiError(401, "Invalid Access Token for user")
         }
 
         req.user = user;
         next()
     } catch (error) {
-        throw new ApiError(401,"Invalid Access token")
+        console.log("verifyJWT ERROR ->", error);
+        if (error instanceof ApiError) throw error;
+        throw new ApiError(401, (error as Error)?.message || "Invalid Access Token");
     }
 });
 

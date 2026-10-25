@@ -10,7 +10,7 @@ export const generateAccessToken = (user: Pick<User, "id" | "email">): string =>
     return jwt.sign(
         { id: user.id, email: user.email },
         process.env.ACCESS_TOKEN_SECRET!,
-        { expiresIn: "15m" }
+        { expiresIn: "1d" }
     );
 };
 
@@ -18,6 +18,6 @@ export const generateRefreshToken = (userId: number): string => {
     return jwt.sign(
         { id: userId },
         process.env.REFRESH_TOKEN_SECRET!,
-        { expiresIn: "7d" }
+        { expiresIn: "10d" }
     );
 };
