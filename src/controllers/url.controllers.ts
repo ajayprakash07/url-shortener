@@ -1,6 +1,6 @@
 import { throws } from "assert";
 import "dotenv/config";
-import prisma from "../db.js";
+import {prisma ,clientRedis} from "../db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { encode , decode } from "./converter.controllers.js";
@@ -83,9 +83,7 @@ const directURL = asyncHandler(async(req,res) => {
         data: { visit: { increment: 1 }}
     })
 
-    return res.status(200).json(
-        new ApiResponse(200,url,"URL successfully Fetched")
-    );
+    return res.redirect(url.url);
 });
 
 const deleteURL = asyncHandler(async(req,res) => {
