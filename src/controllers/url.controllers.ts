@@ -1,4 +1,5 @@
 import { throws } from "assert";
+import "dotenv/config";
 import prisma from "../db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -19,6 +20,16 @@ const createLink = asyncHandler(async(req,res) => {
 
     if(!id){
         throw new ApiError(400,"User id is required");
+    }
+
+    const count = await prisma.link.count({
+        where: {
+            userId: id
+        }
+    });
+
+    if(count>Number(process.env.LINK_LIMIT)){
+        throw new ApiError(403,"Link creation Limit reached (Max 10)");
     }
 
     const upload: Link | null = await prisma.link.create({
@@ -98,8 +109,29 @@ const deleteURL = asyncHandler(async(req,res) => {
     );
 });
 
+const fetchUser = asyncHandler(async(req,res) => {
+    const {id}  = (req as any).user;
+
+    if(!id){
+        throw new ApiError(400,"Unauthotized Access");
+    }
+
+    const detail = await prisma.link.findMany({
+        where: {userId:id}
+    });
+
+    if(!detail){
+        throw new ApiError(404,"Something went wrong");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200,detail,"Details fetched Successfully")
+    );
+});
+
 export {
     createLink,
     directURL,
-    deleteURL
+    deleteURL,
+    fetchUser
 }
