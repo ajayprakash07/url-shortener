@@ -1,22 +1,21 @@
 import "dotenv/config";
-import { prisma , clientRedis} from "./db.js";
+import { prisma , redis} from "./db.js";
 import { app } from "./index.js"; 
 
 const PORT = process.env.PORT || 8000;
 
 
-clientRedis.on("connect", () => console.log("✅ Redis connected"));
-clientRedis.on("error", (err) => console.error("❌ Redis error:", err));
-
 async function startServer() {
     try {
-        //Check PostgreSQL
+        //PostgreSQL connection
         await prisma.$connect();
         console.log("✅ PostgreSQL connected via Prisma");
-        //Check Redis
-        await clientRedis.ping();
-        console.log("✅ Redis ping successful");
-        //Start Express
+        
+        //redis http connection 
+        const pong = await redis.ping();
+        console.log("✅ Upstash Redis connected:", pong); 
+        
+        //start express
         app.listen(PORT, () => {
             console.log(`⚙️  Server is running at port: ${PORT}`);
         });
@@ -25,4 +24,5 @@ async function startServer() {
         process.exit(1);
     }
 }
+
 startServer();

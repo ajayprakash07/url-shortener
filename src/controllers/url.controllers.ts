@@ -1,6 +1,6 @@
 import { throws } from "assert";
 import "dotenv/config";
-import {prisma ,clientRedis} from "../db.js";
+import {prisma ,redis} from "../db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { encode , decode } from "./converter.controllers.js";
@@ -63,27 +63,60 @@ const directURL = asyncHandler(async(req,res) => {
         throw new ApiError(400,"Invalid short URL");
     }
 
-    const index:number = decode(code);
+    const index:number = (decode(code)) - offset;
 
-    console.log(index);
-    if(!index || index<offset){
-        throw new ApiError(400,"Bad Request ,Invalid index.");
+    if(!index || index<=0){
+        throw new ApiError(400,"Bad Request , Invalid index.");
     }
 
+    //calling redis first
+    const key = `url:${index}`;
+    const visitKey = `url:${index}:visit`;
+    const urlRedis:string | null= await redis.get(key);
+    
+    if(urlRedis){
+        const pendingVisits:number = await redis.incr(visitKey).catch(() => 0);
+        if (pendingVisits >= 5) {
+            await redis.set(visitKey, 0);
+            prisma.link.update({
+                where: { id: index },
+                data: { visit: { increment: pendingVisits } }
+            }).catch(console.error);
+            console.log(`Flushed ${pendingVisits} visits from Redis to PostgreSQL`);
+        }
+
+        const ttl=await redis.ttl(key).catch(console.error);
+        console.log("⚡ CACHE HIT (Redis) TTL=",ttl);
+        return res.status(200).json(
+            new ApiResponse(200,urlRedis,"URL fetched SuccessFully via Redis DB")
+        );
+    }
+
+    console.log("🐢 CACHE MISS (PostgreSQL)");
+
     const url: Link | null = await prisma.link.findUnique({
-        where : { id:index-offset }
+        where : { id:index }
     })
 
     if(!url){
         throw new ApiError(404,"Something went wrong while fetching");
     }
 
-    await prisma.link.update({
-        where: {id : index-offset},
-        data: { visit: { increment: 1 }}
+    const incr = await prisma.link.update({
+        where: {id : index},
+        data: { visit: { increment: 1 }},
+        select: {url:true , visit:true}
     })
 
-    return res.redirect(url.url);
+    //if visit is more than 10 , put on redis for 20mins 
+    if(incr.visit>4){
+        await redis.set(key,incr.url, {ex:30} );
+        await redis.set(visitKey,0, {ex:30});
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200,url,"URL fetched SuccessFully via PostgresDB")
+    );
 });
 
 const deleteURL = asyncHandler(async(req,res) => {

@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import "dotenv/config";
-import prisma from "../db.js";
+import {prisma} from "../db.js";
 import type { Request, Response, NextFunction } from "express";
 import type { User } from "@prisma/client";
 

@@ -1,5 +1,5 @@
 import { throws } from "assert";
-import prisma from "../db.js";
+import{ prisma }from "../db.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { encode , decode } from "./converter.controllers.js";

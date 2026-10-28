@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Redis } from "ioredis"
+import { Redis } from '@upstash/redis'
 
 // 1. Initialize the Postgres adapter with your cloud DB URL
 const adapter = new PrismaPg({ 
@@ -12,13 +12,13 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 //redis 
-const redisUrl = process.env.REDIS_URL;
-if (!redisUrl) {
-  throw new Error("REDIS_URL environment variable is required");
-}
-const clientRedis = new Redis(redisUrl);
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+})
 
 export {
-  clientRedis,
+  redis,
   prisma
 }
